@@ -6,7 +6,7 @@ import time
 import os
 import math
 
-DB_DIR = '/home/user1/game1/db/'
+DB_DIR = '/var/www/sqlite/'
 PLACES_DB_FILE = 'places.sqlite'
 CITY_DB_FILE = 'city.sqlite'
 MIN_RAST = 0.05

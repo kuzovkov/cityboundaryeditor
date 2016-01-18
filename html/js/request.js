@@ -1,7 +1,7 @@
 /** модуль запросов к серверу **/
 
 var Request = {
-    server: 'http://cityboundary.py',
+    server: 'http://cityboundary.py:8080',
     
      /**
     * определение принадлежности точки городу

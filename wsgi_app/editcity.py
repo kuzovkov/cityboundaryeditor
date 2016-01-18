@@ -6,7 +6,7 @@ import time
 import os
 import math
 
-DB_DIR = '/home/user1/game1/db/'
+DB_DIR = '/var/www/sqlite/'
 PLACES_DB_FILE = 'places.sqlite'
 CITY_DB_FILE = 'city.sqlite'
 MIN_RAST = 0.05
@@ -38,10 +38,10 @@ def application(environ, start_response):
 
 #редактирование города в базе
 def editCity(id, city_name, city_lastname, city_country, city_geometry, db_file):
+    print DB_DIR + db_file
     conn = db.connect(DB_DIR + db_file)
     cur = conn.cursor()
     sql = "SELECT MbrMinX(GeomFromGeoJSON('"+ city_geometry +"')) as min_lng, MbrMinY(GeomFromGeoJSON('"+ city_geometry +"')) as min_lat, MbrMaxX(GeomFromGeoJSON('"+ city_geometry +"')) as max_lng, MbrMaxY(GeomFromGeoJSON('"+ city_geometry +"')) as max_lat"
-    print sql
     res = cur.execute(sql)
     for rec in res:
         print rec
