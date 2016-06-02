@@ -6,7 +6,13 @@ import time
 import os
 import math
 
-DB_DIR = '/home/user1/game1/db/'
+import sys
+abspath = os.path.dirname(__file__)
+sys.path.append(abspath)
+os.chdir(abspath)
+import config
+
+DB_DIR = config.DB_DIR
 PLACES_DB_FILE = 'places.sqlite'
 CITY_DB_FILE = 'city.sqlite'
 MIN_RAST = 0.05
