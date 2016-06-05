@@ -1,7 +1,7 @@
 /** модуль запросов к серверу **/
 
 var Request = {
-    server: 'http://cityboundaryeditor.loc:8080',
+    server: window.location.protocol + '//' + window.location.host,
     
      /**
     * определение принадлежности точки городу

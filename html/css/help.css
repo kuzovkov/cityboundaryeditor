@@ -2,7 +2,7 @@
 {
     font-family: Verdana;
     font-size: 1.0em;
-    font-style: justify;
+    font-style: italic;
     width: 80%;
     margin: 0 auto 0 auto;
 }
@@ -11,5 +11,17 @@
 {
     width: 100%;
     margin: 10px 0 10px 0;
+}
+
+#up
+{
+    position: fixed;
+    top: 50%;
+    right: 50px;
+    border-radius: 20px;
+    background-color: #828c95;
+    font-family: Verdana;
+    padding:5px;
+    cursor: pointer;
 }
 

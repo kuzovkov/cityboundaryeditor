@@ -4,7 +4,7 @@ App.iface = {};
 App.cityPoly = null;  //мультиполигон(полигон) города
 App.point = null;//маркер произвольной точки
 App.city_list = [];//список городов (массив объектов)
-App.city = null; //объект города
+App.city = null; //объект текущего города
 App.iface.boundaryIcon = L.icon({ //иконка флажка для обозначения границы
     iconUrl: 'img/flag32.png',
     iconRetinaUrl: 'img/flag32.png',
@@ -19,6 +19,9 @@ App.tempPolygonStyle = {
     "opacity": 0.65
 };
 
+App.counties = {'RUS':'Россия', 'UKR':'Украина', 'DEU':'Германия', 'POL':'Польша'}; /*список стран*/
+App.lastCountry = 'RUS';
+
 App.boundaryMarkers = [];//массив для хранения объектов маркеров обозначающих границу
 App.tempPolygonGeoJSON = null; //объект для хранения GeoJSON временного полигона
 App.tempPolygon = null; //объект для хранения временного полигона
@@ -30,14 +33,17 @@ App.init = function(){
     App.iface.btnDelCity = document.getElementById('del-city');
     App.iface.btnSaveCity = document.getElementById('save-city');
     App.iface.btnDelMarkers = document.getElementById('del-markers');
+    App.iface.btnAddCity = document.getElementById('add-city');
     App.iface.inputCityName = document.getElementById('city-name');
     App.iface.inputCityLastname = document.getElementById('city-lastname');
-    App.iface.inputCityCountry = document.getElementById('city-country');
+    App.iface.selectCityCountry = document.getElementById('city-country');
     App.iface.selectCityList = document.getElementById('city-list');
     App.iface.btnSaveCity.onclick = Handler.btnSaveCityClick;
     App.iface.btnDelCity.onclick = Handler.btnDelCityClick;
     App.iface.btnDelMarkers.onclick = Handler.btnDelMarkersClick;
+    App.iface.btnAddCity.onclick = Handler.btnAddCityClick;
     App.iface.selectCityList.onchange = App.getCity;
+    App.iface.selectCityCountry.onchange = App.changeCountry;
     App.map.addListener('click', Handler.mapClick);
     App.iface.addRadioListener('task', App.switchMode);
     App.switchMode();
@@ -117,6 +123,14 @@ App.switchMode = function(){
     }
 };
 
+/**
+ * *обработчик изменения селекта со страной
+ */
+App.changeCountry = function(){
+    App.lastCountry = App.iface.selectCityCountry.value;
+    App.fillList(App);
+
+}
 
 /**
 * определение принадлежности заданной точки к городу 
@@ -159,7 +173,7 @@ App.showCity = function(result){
     App.cityPoly = L.geoJson(result.city_geometry).addTo(Map.map);
     App.iface.inputCityName.value = result.city_name;
     App.iface.inputCityLastname.value = result.city_lastname;
-    App.iface.inputCityCountry.value = result.city_country;
+    App.fillCountriesList(App.city_list);
 };
 
 /**
@@ -172,10 +186,13 @@ App.showCity2 = function(result){
     App.city = result;
     if (App.iface.getRadio('task') == 'view'){
         App.cityPoly = L.geoJson(result.city_geometry).addTo(Map.map);
+    }else{
+        //App.createMarkersFromCity();
+        //App.showTempPolygon(App.boundaryMarkers);
     }
     App.iface.inputCityName.value = result.city_name;
     App.iface.inputCityLastname.value = result.city_lastname;
-    App.iface.inputCityCountry.value = result.city_country;
+    App.fillCountriesList(App.city_list);
 };
 
 
@@ -185,12 +202,12 @@ App.showCity2 = function(result){
 App.hideCity = function(){
     if (App.cityPoly != null){
         Map.map.removeLayer(App.cityPoly);
-        App.city = null;
         App.cityPoly = null;
     }
+    App.city = null;
     App.iface.inputCityName.value = "";
     App.iface.inputCityLastname.value = "";
-    App.iface.inputCityCountry.value = "";
+    App.fillCountriesList(App.city_list);
 };
 
 
@@ -230,18 +247,22 @@ App.fillList = function(result){
     
     App.city_list = result.city_list;
     App.iface.destroyChildren(App.iface.selectCityList);
-    
+    App.fillCountriesList(App.city_list);
+    var country_id = (App.city != null)? App.city.city_country : App.lastCountry;
+
     for (var i = 0; i < result.city_list.length; i++){
-        var opt = document.createElement('option');
-        opt.value = result.city_list[i].id;
-        opt.innerText = result.city_list[i].city_name;
-        opt.textContent = result.city_list[i].city_name;
-        if (App.city != null && result.city_list[i].id == App.city.id){
-            opt.selected = 'selected';
+        if (App.city_list && result.city_list[i].city_country == country_id){
+            var opt = document.createElement('option');
+            opt.value = result.city_list[i].id;
+            opt.innerText = result.city_list[i].city_name;
+            opt.textContent = result.city_list[i].city_name;
+            if (App.city != null && result.city_list[i].id == App.city.id){
+                opt.selected = 'selected';
+            }
+            App.iface.selectCityList.appendChild(opt);
         }
-        App.iface.selectCityList.appendChild(opt);
     }
-        
+
 };
 
 /**
@@ -324,8 +345,9 @@ App.hideTempPolygon = function(){
 App.saveChange = function(){
     var name = App.iface.inputCityName.value;
     var lastname = App.iface.inputCityLastname.value;
-    var country = App.iface.inputCityCountry.value;
+    var country = App.iface.selectCityCountry.value;
     var geometry = null;
+    console.log(App.city);
     
     if (name == '' || lastname == '' || country == ''){
         alert('Заполните текстовые поля!');
@@ -335,21 +357,26 @@ App.saveChange = function(){
     if (App.tempPolygon != null && App.city != null){
         geometry = App.tempPolygonGeoJSON;
         id = App.city.id;
-        if (!confirm('Внести изменения в данные населенного пункта?')) return;
+        if (!confirm('Внести изменения в данные населенного пункта '+ App.city.city_name +'?')) return;
         Request.editCity(id, name, lastname, country, geometry, function(result){
             App.getCity();
         });
     }else if (App.city != null){
         geometry = App.city.city_geometry;
         id = App.city.id;
-        if (!confirm('Внести изменения в данные населенного пункта?')) return;
+        if (!confirm('Внести изменения в данные населенного пункта '+ App.city.city_name +'?')) return;
         Request.editCity(id, name, lastname, country, geometry, function(result){
             App.getCity();
         });
     }else if(App.tempPolygon != null){
         geometry = App.tempPolygonGeoJSON;
+
+        if (!confirm('Добавить населенный пункт ' + name + '?')) return;
+        if (App.cityNameExists(name, country)){
+            alert('Населенный пункт с именем ' + name + ' уже существует в стране ' + App.counties[country]);
+            return;
+        }
         App.iface.showElem(App.iface.preloader);
-        if (!confirm('Добавить населенный пункт?')) return;
         Request.addCity(name, lastname, country, geometry, function(result){
             App.hideTempPolygon();
             App.delBoundaryMarkers();
@@ -369,7 +396,7 @@ App.saveChange = function(){
  * Отправка запроса на сервер для удаления города
  * */
 App.delCity = function(){
-    if (!confirm('Удалить данные текущего населенного пункта?')) return;
+    if (!confirm('Удалить данные текущего населенного пункта: '+ App.city.city_name +'?')) return;
     if (App.city != null){
         var id = App.city.id;
         Request.delCity(id, function(){
@@ -383,3 +410,45 @@ App.delCity = function(){
         alert('Населенный пункт не выбран!');
     }
 };
+
+/**
+ * заполнение списка стран
+ */
+App.fillCountriesList = function(city_list){
+    var countries = {};
+    var select = document.getElementById('city-country');
+    App.iface.destroyChildren(select);
+    var country_id = (App.city != null)? App.city.city_country : App.lastCountry;
+    if (App.city_list && city_list.length > 0){
+        for(var i = 0; i < city_list.length; i++){
+            if (countries[city_list[i].city_country]) continue;
+            var opt = document.createElement('option');
+            opt.value = city_list[i].city_country;
+            opt.innerText = App.counties[city_list[i].city_country];
+            opt.textContent = App.counties[city_list[i].city_country];
+            if (city_list[i].city_country == country_id){
+                opt.selected = 'selected';
+            }
+            select.appendChild(opt);
+            countries[city_list[i].city_country] = true;
+        }
+    }
+
+};
+
+/**
+ * проверка есть ли уже город с тким именем в такой стране
+ * @param name
+ * @param country_id
+ * @returns {boolean}
+ */
+App.cityNameExists = function(name, country_id){
+    if (App.city_list && App.city_list.length > 0){
+        for (var i = 0; i < App.city_list.length; i++){
+            if (App.city_list[i].city_name == name && App.city_list[i].city_country == country_id){
+                return true;
+            }
+        }
+    }
+    return false;
+}

@@ -6,10 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta charset="utf-8" />
 	<link rel="stylesheet" href="/css/style.css" />
-	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
-	<!--<link rel="stylesheet" href="css/leaflet.css" />-->
-	<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
-	<!--<script src="js/lib/leaflet.js"></script>-->
+	<!--<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />-->
+	<link rel="stylesheet" href="css/leaflet.css" />
+	<!--<script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>-->
+	<script src="js/lib/leaflet.js"></script>
 	<script src="js/lib/leaflet-providers.js"></script>
 	<script src="js/lib/google_tiles.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
@@ -35,6 +35,7 @@
                 <button class="grad2" id="del-city">Удалить</button>
                 <button class="grad2" id="save-city">Сохранить</button>
                 <button class="grad2" id="del-markers">Удалить маркеры</button>
+                <button class="grad2" id="add-city">Очистить все</button>
             </div>
             <a href="help.html" class="helplink">Справка</a>
         </div>
@@ -42,7 +43,7 @@
 		<p class="name">
             <input id="city-name" type="text" name="name" value="" placeholder="Name"/>&nbsp;
             <input id="city-lastname" type="text" name="lastname" value="" placeholder="Lastname" />&nbsp;
-            <input id="city-country" type="text" name="country" value="" placeholder="Country"/>&nbsp;
+            <select id="city-country" type="text" name="country"></select>&nbsp;
 		</p>
 		<div id="map-block"></div>
 		

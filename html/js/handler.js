@@ -29,6 +29,16 @@ Handler.btnDelMarkersClick = function(){
     App.hideTempPolygon();
     App.hideCityPolygon();
 };
+
+/**
+ * добавление нового города
+ **/
+Handler.btnAddCityClick = function(){
+    App.delBoundaryMarkers();
+    App.hideTempPolygon();
+    App.hideCityPolygon();
+    App.hideCity();
+};
     
 
 /**
