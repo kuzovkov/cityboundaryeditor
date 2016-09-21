@@ -18,6 +18,7 @@ CITY_DB_FILE = 'city.sqlite'
 MIN_RAST = 0.05
 
 def application(environ, start_response):
+    print '-' * 50
     status = '200 OK'
     d = parse_qs(environ['QUERY_STRING'])
     data = d['data'][0].split(',')
@@ -45,6 +46,7 @@ def searchCity(point_lat, point_lng, db_file):
     res = cur.execute(sql)
     for rec in res:
         id = rec[0]
+        print 'id=%i' % id
         city_geometry = rec[1].strip().encode('utf-8')
         city_name = rec[2].encode('utf-8')
         city_lastname = rec[3].encode('utf-8')
@@ -53,18 +55,20 @@ def searchCity(point_lat, point_lng, db_file):
         min_lng = rec[6]
         max_lat = rec[7]
         max_lng = rec[8]
+        print 'city_name=%s' % city_name
+        print 'min_lat=%f max_lat=%f min_lng=%f max_lng=%f' % (min_lat, max_lat, min_lng, max_lng)
         point_geometry = '{"type":"Point","coordinates":[' + str(point_lng) + ',' + str(point_lat) + ']}'
-    if id == -1:
-        return None
-    sql = "SELECT Intersects(GeomFromGeoJSON('" + city_geometry + "'),GeomFromGeoJSON('" + point_geometry + "'))"
-    res = cur.execute(sql)
-    in_city = 0
-    for rec in res:
-        print 'rec=' + str(rec)
-        in_city = rec[0]
+        if id != -1:
+            sql = "SELECT Intersects(GeomFromGeoJSON('" + city_geometry + "'),GeomFromGeoJSON('" + point_geometry + "'))"
+            res2 = cur.execute(sql)
+            in_city = 0
+            for rec2 in res2:
+                print 'rec=' + str(rec2)
+                in_city = rec2[0]
+                if in_city == 1:
+                    cur.close()
+                    conn.close()
+                    return (city_name, city_lastname, city_geometry, city_country, id, (min_lat + max_lat) / 2, (min_lng + max_lng) / 2)
     cur.close()
     conn.close()
-    if in_city == 1:
-        return (city_name, city_lastname, city_geometry, city_country, id, (min_lat+max_lat)/2, (min_lng+max_lng)/2)
-    else:
-        return None
+    return None
