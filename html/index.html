@@ -40,13 +40,23 @@
             <a href="help.html" class="helplink">Справка</a>
         </div>
         <div class="clr"></div>
-		<p class="name">
-            <input id="city-name" type="text" name="name" value="" placeholder="Name"/>&nbsp;
-            <input id="city-lastname" type="text" name="lastname" value="" placeholder="Lastname" />&nbsp;
+		<div class="name">
+            <input id="city-name" type="text" name="name" value="" placeholder="Name" class="city-name"/>&nbsp;
+            <input id="city-lastname" type="text" name="lastname" value="" placeholder="Lastname" class="city-name"/>&nbsp;
             <select id="city-country" type="text" name="country"></select>&nbsp;
-		</p>
+            <div class="city-scale grad2">
+                <fieldset >
+                    <legend>Масштаб</legend>
+                    Полк <input type="checkbox" name="regiment" value="1"/>&nbsp;
+                    Бригада <input type="checkbox" name="brigade" value="2"/>&nbsp;
+                    Дивизия<input type="checkbox" name="division" value="4"/>&nbsp;
+                </fieldset>
+            </div>
+            <div class="clr"></div>
+		</div>
+
 		<div id="map-block"></div>
-		
+
 		
 		<div id="preloader"><img src="/img/load.gif"/></div>
 		<label class="time-label">Time: </label><span class="time-label" id="time"></span>
