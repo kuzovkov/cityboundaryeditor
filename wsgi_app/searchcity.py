@@ -29,7 +29,7 @@ def application(environ, start_response):
     city = searchCity(point_lat, point_lng, db_file)
     print city
     if city != None:
-        response = '{"incity":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '","city_geometry":' + city[2] + ', "city_country":"' + city[3] + '", "id":' + str(city[4])+ ', "avg_lat":'+str(city[5])+', "avg_lng":'+str(city[6])+'}'
+        response = '{"incity":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '","city_geometry":' + city[2] + ', "city_country":"' + city[3] + '", "id":' + str(city[4])+ ', "avg_lat":'+str(city[5])+', "avg_lng":'+str(city[6])+', "scale":' + str(city[7])+'}'
 		#response = '{"incity":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '"}'
     else:
         response = '{"incity":false}'
@@ -41,7 +41,7 @@ def application(environ, start_response):
 def searchCity(point_lat, point_lng, db_file):
     conn = db.connect(DB_DIR + db_file)
     cur = conn.cursor()
-    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng FROM city WHERE min_lng <= " + str(point_lng) + " AND min_lat <= " + str(point_lat) + " AND max_lng  >= " + str(point_lng) + " AND max_lat >= " + str(point_lat)
+    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng, scale FROM city WHERE min_lng <= " + str(point_lng) + " AND min_lat <= " + str(point_lat) + " AND max_lng  >= " + str(point_lng) + " AND max_lat >= " + str(point_lat)
     id = -1
     res = cur.execute(sql)
     for rec in res:
@@ -55,8 +55,9 @@ def searchCity(point_lat, point_lng, db_file):
         min_lng = rec[6]
         max_lat = rec[7]
         max_lng = rec[8]
-        print 'city_name=%s' % city_name
-        print 'min_lat=%f max_lat=%f min_lng=%f max_lng=%f' % (min_lat, max_lat, min_lng, max_lng)
+        scale = rec[9]
+        #print 'city_name=%s' % city_name
+        #print 'min_lat=%f max_lat=%f min_lng=%f max_lng=%f' % (min_lat, max_lat, min_lng, max_lng)
         point_geometry = '{"type":"Point","coordinates":[' + str(point_lng) + ',' + str(point_lat) + ']}'
         if id != -1:
             sql = "SELECT Intersects(GeomFromGeoJSON('" + city_geometry + "'),GeomFromGeoJSON('" + point_geometry + "'))"
@@ -68,7 +69,7 @@ def searchCity(point_lat, point_lng, db_file):
                 if in_city == 1:
                     cur.close()
                     conn.close()
-                    return (city_name, city_lastname, city_geometry, city_country, id, (min_lat + max_lat) / 2, (min_lng + max_lng) / 2)
+                    return (city_name, city_lastname, city_geometry, city_country, id, (min_lat + max_lat) / 2, (min_lng + max_lng) / 2, scale)
     cur.close()
     conn.close()
     return None

@@ -30,10 +30,11 @@ def application(environ, start_response):
     lastname = data[1]
     country = data[2]
     geometry = data[3]
+    scale = data[4]
     db_file = CITY_DB_FILE
-    city = addCity(name, lastname, country, geometry, db_file)
+    city = addCity(name, lastname, country, geometry, scale, db_file)
     if city != None:
-        response = '{"result":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '","city_geometry":' + city[2] + ', "city_country":"' + city[3] + '", "id":' + str(city[4])+ ', "avg_lat":'+str(city[5])+', "avg_lng":'+str(city[6])+'}'
+        response = '{"result":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '","city_geometry":' + city[2] + ', "city_country":"' + city[3] + '", "id":' + str(city[4])+ ', "avg_lat":'+str(city[5])+', "avg_lng":'+str(city[6])+', "scale":'+str(city[7])+'}'
         #response = '{"incity":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '"}'
     else:
         response = '{"result":false}'
@@ -42,7 +43,7 @@ def application(environ, start_response):
     return [response]
 
 #добавление города в базу
-def addCity(city_name, city_lastname, city_country, city_geometry, db_file):
+def addCity(city_name, city_lastname, city_country, city_geometry, scale, db_file):
     conn = db.connect(DB_DIR + db_file)
     cur = conn.cursor()
     sql = "SELECT MbrMinX(GeomFromGeoJSON('"+ city_geometry +"')) as min_lng, MbrMinY(GeomFromGeoJSON('"+ city_geometry +"')) as min_lat, MbrMaxX(GeomFromGeoJSON('"+ city_geometry +"')) as max_lng, MbrMaxY(GeomFromGeoJSON('"+ city_geometry +"')) as max_lat"
@@ -55,7 +56,7 @@ def addCity(city_name, city_lastname, city_country, city_geometry, db_file):
         max_lng = rec[2]
         max_lat = rec[3]
     print 'min_lng='+str(min_lng)
-    sql = "INSERT INTO city (city_name, city_lastname, geometry, min_lng, min_lat, max_lng, max_lat, country) VALUES('"+city_name+"', '"+city_lastname+"', '"+city_geometry+"'," + str(min_lng) + "," + str(min_lat) + "," + str(max_lng) + "," + str(max_lat) + ", '" + city_country + "')"
+    sql = "INSERT INTO city (city_name, city_lastname, geometry, min_lng, min_lat, max_lng, max_lat, country, scale) VALUES('"+city_name+"', '"+city_lastname+"', '"+city_geometry+"'," + str(min_lng) + "," + str(min_lat) + "," + str(max_lng) + "," + str(max_lat) + ", '" + city_country + "'," + str(scale) + ")"
     print sql
     cur.execute(sql)
     conn.commit()
@@ -72,7 +73,8 @@ def addCity(city_name, city_lastname, city_country, city_geometry, db_file):
         min_lng = rec[6]
         max_lat = rec[7]
         max_lng = rec[8]
+        scale = rec[9]
     if id == -1:
         return None
     else:
-        return (city_name, city_lastname, city_geometry, city_country, id, (min_lat+max_lat)/2, (min_lng+max_lng)/2)
+        return (city_name, city_lastname, city_geometry, city_country, id, (min_lat+max_lat)/2, (min_lng+max_lng)/2, scale)

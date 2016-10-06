@@ -25,7 +25,7 @@ def application(environ, start_response):
     db_file = CITY_DB_FILE
     city = getCity(id, db_file)
     if city != None:
-        response = '{"result":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '","city_geometry":' + city[2] + ', "city_country":"' + city[3] + '", "id":' + str(city[4])+ ', "avg_lat":'+str(city[5])+', "avg_lng":'+str(city[6])+'}'
+        response = '{"result":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '","city_geometry":' + city[2] + ', "city_country":"' + city[3] + '", "id":' + str(city[4])+ ', "avg_lat":'+str(city[5])+', "avg_lng":'+str(city[6])+', "scale":'+str(city[7])+'}'
         #response = '{"incity":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '"}'
     else:
         response = '{"result":false}'
@@ -37,7 +37,7 @@ def application(environ, start_response):
 def getCity(id, db_file):
     conn = db.connect(DB_DIR + db_file)
     cur = conn.cursor()
-    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng FROM city WHERE id=" + str(id) 
+    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng, scale FROM city WHERE id=" + str(id)
     id = -1
     res = cur.execute(sql)
     for rec in res:
@@ -50,9 +50,10 @@ def getCity(id, db_file):
         min_lng = rec[6]
         max_lat = rec[7]
         max_lng = rec[8]
+        scale = rec[9]
     cur.close()
     conn.close()
     if id == -1:
         return None
     else:
-        return (city_name, city_lastname, city_geometry, city_country, id, (min_lat+max_lat)/2, (min_lng+max_lng)/2)
+        return (city_name, city_lastname, city_geometry, city_country, id, (min_lat+max_lat)/2, (min_lng+max_lng)/2, scale)

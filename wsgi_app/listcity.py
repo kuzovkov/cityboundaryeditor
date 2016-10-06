@@ -30,11 +30,11 @@ def application(environ, start_response):
     start_response(status, response_headers)
     return [response]
 
-#определение пересечения точки с полигоном города и возврат в случае пересечения имени города и его полигона
+#получение списка словарей описывающих города
 def getListCity(db_file):
     conn = db.connect(DB_DIR + db_file)
     cur = conn.cursor()
-    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng FROM city ORDER BY city_name" 
+    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng, scale FROM city ORDER BY city_name"
     res = cur.execute(sql)
     citylist = []
     for rec in res:
@@ -47,8 +47,9 @@ def getListCity(db_file):
         min_lng = rec[6]
         max_lat = rec[7]
         max_lng = rec[8]
-        cityitem = '{"incity":true, "city_name":"' + city_name + '", "city_lastname":"' + city_lastname + '","city_geometry":' + city_geometry + ', "city_country":"' + city_country + '", "id":' + str(id)+ ', "avg_lat":'+str((min_lat+max_lat)/2)+', "avg_lng":'+str((min_lng+max_lng)/2)+'}'
-        citylist.append(cityitem);
+        scale = rec[9]
+        cityitem = '{"incity":true, "city_name":"' + city_name + '", "city_lastname":"' + city_lastname + '","city_geometry":' + city_geometry + ', "city_country":"' + city_country + '", "id":' + str(id)+ ', "avg_lat":'+str((min_lat+max_lat)/2)+', "avg_lng":'+str((min_lng+max_lng)/2) + ', "scale":' + str(scale) + '}'
+        citylist.append(cityitem)
     cur.close()
     conn.close()
     if len(citylist) == 0:
