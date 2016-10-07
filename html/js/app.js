@@ -93,6 +93,25 @@ App.iface.getRadio = function(name){
     return null;
 };
 
+/**
+ * Установка радио переключателя масштаба
+ * @param scale
+ */
+App.iface.setScaleRadio = function(scale){
+    var input_regiment = document.getElementById('scale-regiment');
+    var input_brigade = document.getElementById('scale-brigade');
+    var input_division = document.getElementById('scale-division');
+    input_regiment.checked = false;
+    input_brigade.checked = false;
+    input_division.checked = false;
+    if (scale != null){
+        if (scale == 0) input_regiment.checked = true;
+        if (scale == 1) input_brigade.checked = true;
+        if (scale == 2) input_division.checked = true;
+    }
+
+}
+
 
 /**
  * установка обработчиков на переключение радиокнопки
@@ -173,6 +192,7 @@ App.showCity = function(result){
     App.cityPoly = L.geoJson(result.city_geometry).addTo(Map.map);
     App.iface.inputCityName.value = result.city_name;
     App.iface.inputCityLastname.value = result.city_lastname;
+    App.iface.setScaleRadio(result.scale);
     App.fillCountriesList(App.city_list);
 };
 
@@ -192,6 +212,7 @@ App.showCity2 = function(result){
     }
     App.iface.inputCityName.value = result.city_name;
     App.iface.inputCityLastname.value = result.city_lastname;
+    App.iface.setScaleRadio(result.scale);
     App.fillCountriesList(App.city_list);
 };
 
@@ -208,6 +229,7 @@ App.hideCity = function(){
     App.iface.inputCityName.value = "";
     App.iface.inputCityLastname.value = "";
     App.fillCountriesList(App.city_list);
+    App.iface.setScaleRadio(null);
 };
 
 
@@ -244,7 +266,6 @@ App.getList = function(){
  * Заполнение списка городов
  * */
 App.fillList = function(result){
-    
     App.city_list = result.city_list;
     App.iface.destroyChildren(App.iface.selectCityList);
     App.fillCountriesList(App.city_list);
@@ -346,6 +367,7 @@ App.saveChange = function(){
     var name = App.iface.inputCityName.value;
     var lastname = App.iface.inputCityLastname.value;
     var country = App.iface.selectCityCountry.value;
+    var scale = App.iface.getRadio('scale');
     var geometry = null;
     console.log(App.city);
     
@@ -358,14 +380,14 @@ App.saveChange = function(){
         geometry = App.tempPolygonGeoJSON;
         id = App.city.id;
         if (!confirm('Внести изменения в данные населенного пункта '+ App.city.city_name +'?')) return;
-        Request.editCity(id, name, lastname, country, geometry, function(result){
+        Request.editCity(id, name, lastname, country, geometry, scale, function(result){
             App.getCity();
         });
     }else if (App.city != null){
         geometry = App.city.city_geometry;
         id = App.city.id;
         if (!confirm('Внести изменения в данные населенного пункта '+ App.city.city_name +'?')) return;
-        Request.editCity(id, name, lastname, country, geometry, function(result){
+        Request.editCity(id, name, lastname, country, geometry, scale, function(result){
             App.getCity();
         });
     }else if(App.tempPolygon != null){
@@ -377,7 +399,7 @@ App.saveChange = function(){
             return;
         }
         App.iface.showElem(App.iface.preloader);
-        Request.addCity(name, lastname, country, geometry, function(result){
+        Request.addCity(name, lastname, country, geometry, scale, function(result){
             App.hideTempPolygon();
             App.delBoundaryMarkers();
             App.showCity2(result);
@@ -437,7 +459,7 @@ App.fillCountriesList = function(city_list){
 };
 
 /**
- * проверка есть ли уже город с тким именем в такой стране
+ * проверка есть ли уже город с таким именем в такой стране
  * @param name
  * @param country_id
  * @returns {boolean}

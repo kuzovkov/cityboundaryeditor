@@ -11,6 +11,7 @@ abspath = os.path.dirname(__file__)
 sys.path.append(abspath)
 os.chdir(abspath)
 import config
+import json
 
 DB_DIR = config.DB_DIR
 PLACES_DB_FILE = 'places.sqlite'
@@ -22,7 +23,8 @@ def application(environ, start_response):
     db_file = CITY_DB_FILE
     listcity = getListCity(db_file)
     if listcity != None:
-        response = '{"city_list":[' + ','.join(listcity) + ']}'
+        response = json.dumps({'city_list':listcity})
+        #response = '{"city_list":[' + ','.join(listcity) + ']}'
         #response = '{"incity":true, "city_name":"' + city[0] + '", "city_lastname":"' + city[1] + '"}'
     else:
         response = '{"city_list":[]}'
@@ -34,21 +36,35 @@ def application(environ, start_response):
 def getListCity(db_file):
     conn = db.connect(DB_DIR + db_file)
     cur = conn.cursor()
-    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng, scale FROM city ORDER BY city_name"
+    sql = "SELECT id, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng, scale FROM city ORDER BY city_name"
     res = cur.execute(sql)
     citylist = []
     for rec in res:
         id = rec[0]
-        city_geometry = rec[1].strip().encode('utf-8')
-        city_name = rec[2].encode('utf-8')
-        city_lastname = rec[3].encode('utf-8')
-        city_country = rec[4].encode('utf-8')
-        min_lat = rec[5]
-        min_lng = rec[6]
-        max_lat = rec[7]
-        max_lng = rec[8]
-        scale = rec[9]
-        cityitem = '{"incity":true, "city_name":"' + city_name + '", "city_lastname":"' + city_lastname + '","city_geometry":' + city_geometry + ', "city_country":"' + city_country + '", "id":' + str(id)+ ', "avg_lat":'+str((min_lat+max_lat)/2)+', "avg_lng":'+str((min_lng+max_lng)/2) + ', "scale":' + str(scale) + '}'
+        city_name = rec[1].encode('utf-8')
+        city_lastname = rec[2].encode('utf-8')
+        city_country = rec[3].encode('utf-8')
+        min_lat = rec[4]
+        min_lng = rec[5]
+        max_lat = rec[6]
+        max_lng = rec[7]
+        avg_lat = (min_lat + max_lat)/2
+        avg_lng = (min_lng + max_lng)/2
+        scale = rec[8]
+        #cityitem = '{"incity":true, "city_name":"' + city_name + '", "city_lastname":"' + city_lastname + '", "city_country":"' + city_country + '", "id":' + str(id)+ ', "avg_lat":'+str(avg_lat)+', "avg_lng":' + str(avg_lng) + "min_lat"+ '}'
+        cityitem = {}
+        cityitem['incity'] = 'true'
+        cityitem['cityname'] = city_name
+        cityitem['city_lastname'] = city_lastname
+        cityitem['city_country'] = city_country
+        cityitem['id'] = id
+        cityitem['avg_lat'] = avg_lat
+        cityitem['avg_lng'] = avg_lng
+        cityitem['min_lat'] = min_lat
+        cityitem['min_lng'] = min_lng
+        cityitem['max_lat'] = max_lat
+        cityitem['max_lng'] = max_lng
+        cityitem['scale'] = scale
         citylist.append(cityitem)
     cur.close()
     conn.close()

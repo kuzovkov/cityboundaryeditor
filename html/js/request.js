@@ -26,7 +26,7 @@ var Request = {
     getList: function(callback){
         var url = Request.server+'/listcity';
          Ajax.sendRequest('GET', url, null, function(result) {
-            callback(result);
+             callback(result);
         });
     },
     
@@ -46,8 +46,8 @@ var Request = {
     /**
      * редактирование записи о городе
      * */
-    editCity: function(id, name, lastname, country, geometry, callback){
-        var params = 'data=' + [id, name, lastname, country, JSON.stringify(geometry)].join('|');
+    editCity: function(id, name, lastname, country, geometry, scale, callback){
+        var params = 'data=' + [id, name, lastname, country, JSON.stringify(geometry), scale].join('|');
         console.log(params);
         var url = Request.server+'/editcity';
         Ajax.sendRequest('POST', url, params, function(result) {
@@ -58,8 +58,8 @@ var Request = {
      /**
      * создание записи о городе
      * */
-    addCity: function(name, lastname, country, geometry, callback){
-        var params = 'data=' + [name, lastname, country, JSON.stringify(geometry)].join('|');
+    addCity: function(name, lastname, country, geometry, scale, callback){
+        var params = 'data=' + [name, lastname, country, JSON.stringify(geometry), scale].join('|');
         var url = Request.server+'/addcity';
         Ajax.sendRequest('POST', url, params, function(result) {
             callback(result);
