@@ -55,14 +55,10 @@ def addCity(city_name, city_lastname, city_country, city_geometry, scale, db_fil
         min_lat = rec[1]
         max_lng = rec[2]
         max_lat = rec[3]
-    print 'min_lng='+str(min_lng)
-    sql = "INSERT INTO city (city_name, city_lastname, geometry, min_lng, min_lat, max_lng, max_lat, country, scale) VALUES('"+city_name+"', '"+city_lastname+"', '"+city_geometry+"'," + str(min_lng) + "," + str(min_lat) + "," + str(max_lng) + "," + str(max_lat) + ", '" + city_country + "'," + str(scale) + ")"
-    print sql
-    cur.execute(sql)
+    cur.execute("INSERT INTO city (city_name, city_lastname, geometry, min_lng, min_lat, max_lng, max_lat, country, scale) VALUES(?,?,?,?,?,?,?,?,?)", (city_name,city_lastname,city_geometry,min_lng,min_lat,max_lng,max_lat,city_country,scale))
     conn.commit()
-    sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng FROM city WHERE city_name='" + city_name +"'"
+    cur.execute("SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng, scale FROM city WHERE city_name=?",(city_name,))
     id = -1
-    res = cur.execute(sql)
     for rec in res:
         id = rec[0]
         city_geometry = rec[1].strip().encode('utf-8')

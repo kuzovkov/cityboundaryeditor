@@ -56,8 +56,7 @@ def editCity(id, city_name, city_lastname, city_country, city_geometry, scale, d
         min_lat = rec[1]
         max_lng = rec[2]
         max_lat = rec[3]
-    sql = "UPDATE city SET city_name='"+city_name+"',city_lastname='"+city_lastname+"', country='"+city_country+"',geometry='"+city_geometry+"',min_lng="+str(min_lng)+",min_lat="+str(min_lat)+",max_lng="+str(max_lng)+",max_lat="+str(max_lat) + ",scale="+str(scale)+" WHERE id=" + str(id)
-    cur.execute(sql)
+    cur.execute("UPDATE city SET city_name=?, city_lastname=?, country=?, geometry=?, min_lng=?, min_lat=?, max_lng=?,max_lat=?,scale=? WHERE id=?", (city_name, city_lastname, city_country,city_geometry,min_lng,min_lat, max_lat, max_lat, scale, id))
     conn.commit()
     sql = "SELECT id, geometry, city_name, city_lastname, country, min_lat, min_lng, max_lat, max_lng, scale FROM city WHERE id=" + str(id)
     id = -1
